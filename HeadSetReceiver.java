@@ -10,16 +10,7 @@ import android.widget.Toast;
  */
 public class HeadSetReceiver extends BroadcastReceiver {
     @Override public void onReceive(Context context, Intent intent) {
-        if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
-            int state = intent.getIntExtra("state", -1);
-            switch (state) {
-                case 0:
-                    Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
-                    break;
-                case 1:
-                    Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
-                    break;
-            }
-        }
+        Toast.makeText(context, "Boot Complete Received", Toast.LENGTH_LONG).show();
+        context.startService(new Intent(context, ListenForHeadphones.class));
     }
 }
