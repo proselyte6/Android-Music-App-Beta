@@ -1,5 +1,5 @@
 # Android-Music-App-Beta
-Play music automatically when headphones are plugged in. Type of music will be based on preferences movement level.
+Play music automatically when headphones are plugged in. Type of music will be based on preferences and movement level.
 
 This app will run in the background, at all times. 
 The app will constantly be checking on whether headphones are plugged in or not. 
