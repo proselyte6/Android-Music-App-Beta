@@ -14,7 +14,7 @@ import android.widget.Toast;
  */
 public class ListenForHeadphones extends Service {
 
-    //private MediaPlayer mp = MediaPlayer.create(this, R.raw.sample);;
+    private MediaPlayer mp;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -42,14 +42,18 @@ public class ListenForHeadphones extends Service {
                 switch (state) {
                     case 0:
                         Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
-                       // if(mp.isPlaying()){
-                       //     mp.stop();
-                       // }
-                        //stop music
+                        if(mp != null){
+                            mp.stop();
+                            mp = null;
+                        }
                         break;
                     case 1:
                         Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
-                       // mp.start();
+                        if(mp == null){
+                            //get random song to play from music library
+                            mp = MediaPlayer.create(context, R.raw.sample);
+                            mp.start();
+                        }
                         break;
                 }
             }
