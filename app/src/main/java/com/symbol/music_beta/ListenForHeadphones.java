@@ -60,27 +60,27 @@ public class ListenForHeadphones extends Service {
                         break;
                     case 1:
                         Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
-                        if(mp == null){
-                            //mp = MediaPlayer.create(context, R.raw.sample);
-                            mp = new MediaPlayer();
-                            try{
-                                for(String s : songPaths){
-                                    System.out.println(s);
-                                }
-                                Random rand = new Random();
-                                int randSong = rand.nextInt(songPaths.size());
-                                mp.setDataSource(songPaths.get(randSong));
-                                mp.prepare();
-                            }catch(IOException e){
-                                System.out.println("IOEXCEPTION");
+                        while(true){//keep playing songs untill headphones are unplugged
+                            if(mp == null){
+                                mp = new MediaPlayer();
                             }
-                            mp.start();
+                            if(!mp.isPlaying()){
+                                playSong();
+                            }
                         }
-                        break;
                 }
             }
         }
     };
+    public void playSong(){
+        try{
+            Random rand = new Random();
+            int randSong = rand.nextInt(songPaths.size()-7)+7;//skip preloaded crap
+            mp.setDataSource(songPaths.get(randSong));
+            mp.prepare();
+            mp.start();
+        }catch(IOException e){}
+    }
     public ArrayList<String> getSongPath() {
         ArrayList<String> songPaths = new ArrayList<String>();
         Uri exContent = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
