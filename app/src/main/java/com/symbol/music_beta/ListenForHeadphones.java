@@ -50,24 +50,34 @@ public class ListenForHeadphones extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", -1);
-                switch (state) {
-                    case 0:
-                        Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
-                        if(mp != null){
-                            mp.stop();
-                            mp = null;
+                if(state == 1){
+                    Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
+                    while(true){//keep playing songs until headphones are unplugged
+                        if(mp == null){
+                            mp = new MediaPlayer();
                         }
-                        break;
-                    case 1:
-                        Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
-                        while(true){//keep playing songs untill headphones are unplugged
-                            if(mp == null){
-                                mp = new MediaPlayer();
-                            }
-                            if(!mp.isPlaying()){
-                                playSong();
-                            }
+                        if(!mp.isPlaying()){
+                            playSong();
+                            IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
+                            registerReceiver(receiver2, filter);
                         }
+
+                    }
+                }
+            }
+        }
+    };
+    final BroadcastReceiver receiver2 = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
+                int state = intent.getIntExtra("state", -1);
+                if(state == 0){
+                    Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
+                    if(mp != null){
+                        mp.stop();
+                        mp = null;
+                    }
                 }
             }
         }
