@@ -8,6 +8,7 @@ import android.content.IntentFilter;
 import android.database.Cursor;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Environment;
 import android.os.IBinder;
 import android.provider.MediaStore;
@@ -23,8 +24,8 @@ import java.util.Random;
  */
 public class ListenForHeadphones extends Service {
 
-    private MediaPlayer mp;
     private ArrayList<String> songPaths;
+    public boolean isRunning = false;
 
     @Override
     public IBinder onBind(Intent arg0) {
@@ -50,39 +51,53 @@ public class ListenForHeadphones extends Service {
         public void onReceive(Context context, Intent intent) {
             if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
                 int state = intent.getIntExtra("state", -1);
-                if(state == 1){
-                    Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
-                    while(true){//keep playing songs until headphones are unplugged
-                        if(mp == null){
-                            mp = new MediaPlayer();
-                        }
-                        if(!mp.isPlaying()){
-                            playSong();
-                            IntentFilter filter = new IntentFilter(Intent.ACTION_HEADSET_PLUG);
-                            registerReceiver(receiver2, filter);
-                        }
+                switch(state){
+                    case 1:
+                        Toast.makeText(context, "Headphones have been plugged in", Toast.LENGTH_LONG).show();
+                        MusicTask m = new MusicTask();
+                        m.execute();
+                        isRunning = true;
+                        break;
+                    case 0:
+                        Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
+                        isRunning = false;
+                        break;
+                }
+            }
+        }
+    };
 
-                    }
-                }
-            }
-        }
-    };
-    final BroadcastReceiver receiver2 = new BroadcastReceiver() {
+
+    class MusicTask extends AsyncTask<Void,Void,Void>{
+
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_HEADSET_PLUG)) {
-                int state = intent.getIntExtra("state", -1);
-                if(state == 0){
-                    Toast.makeText(context, "Headphones have been unplugged", Toast.LENGTH_LONG).show();
-                    if(mp != null){
-                        mp.stop();
-                        mp = null;
-                    }
-                }
-            }
+        protected void onPreExecute() {
+            super.onPreExecute();
         }
-    };
-    public void playSong(){
+
+       @Override
+        protected Void doInBackground(Void ...params) {
+
+            MediaPlayer mp = new MediaPlayer();
+           while(true){//keep playing songs until headphones are unplugged
+               if(!mp.isPlaying()){
+                   playSong(mp);
+               }
+               if(!isRunning){
+                   mp.stop();
+                   mp.release();
+                   break;
+               }
+           }
+           return null;
+        }
+        @Override
+        protected void onPostExecute(Void result) {
+            super.onPostExecute(result);
+        }
+
+    }
+    public void playSong(MediaPlayer mp){
         try{
             Random rand = new Random();
             int randSong = rand.nextInt(songPaths.size()-7)+7;//skip preloaded crap
